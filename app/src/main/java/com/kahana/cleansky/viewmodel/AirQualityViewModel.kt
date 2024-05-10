@@ -1,5 +1,6 @@
 package com.kahana.cleansky.viewmodel
 
+import android.location.Location
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,9 +14,9 @@ class AirQualityViewModel(private val api: AirQualityApiImp): ViewModel() {
     val airQualityData: LiveData<AirQualityData>
         get() = _airQualityData
 
-    fun getAirQualityData() {
+    fun getAirQualityData(location: Location) {
         viewModelScope.launch {
-           val response = api.getAirQualityData()
+           val response = api.getAirQualityData(location)
             _airQualityData.postValue(response.data)
         }
 

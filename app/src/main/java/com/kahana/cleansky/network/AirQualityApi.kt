@@ -1,9 +1,11 @@
 package com.kahana.cleansky.network
 
+import android.location.Location
 import com.kahana.cleansky.models.AirQualityApiResponse
 import retrofit2.http.GET
+import retrofit2.http.Path
 
 interface AirQualityApi {
-    @GET("/feed/geo:27.099291;-82.431480")
-    suspend fun getAirQualityData(): AirQualityApiResponse
+    @GET("/feed/geo:{latitude};{longitude}")
+    suspend fun getAirQualityData(@Path("longitude")longitude: Double, @Path("latitude")latitude: Double): AirQualityApiResponse
 }

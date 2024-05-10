@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -15,9 +16,13 @@
         android:theme="@style/Theme.CleanSky"
         tools:targetApi="31">
         <activity
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.CleanSky">
+        </activity>
+        <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.CleanSky">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

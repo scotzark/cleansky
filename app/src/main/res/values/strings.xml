@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Clean Sky</string>
+    <string name="request_for_city">Air Quality Request For City:\n %s</string>
+    <string name="air_quality_reporting_stations">Air Quality Reporting Stations:\n %s</string>
+    <string name="air_quality_for_date">Air Quality for %s</string>
+    <string name="ozone_level">Ozone Level: %d</string>
 </resources>

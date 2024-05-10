@@ -4,4 +4,8 @@
     <string name="air_quality_reporting_stations">Air Quality Reporting Stations:\n %s</string>
     <string name="air_quality_for_date">Air Quality for %s</string>
     <string name="ozone_level">Ozone Level: %d</string>
+    <string name="error_no_location_permission">You have to grant location permissions to use this app</string>
+    <string name="error_cannot_determine_location">Cannot Determine your location</string>
+    <string name="error_no_data_for_todays_date">No Air Quality For Today</string>
+    <string name="error_api_error">There was an error communicating with the Air Quality server</string>
 </resources>

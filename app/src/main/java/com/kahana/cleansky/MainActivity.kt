@@ -5,13 +5,18 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageView
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.kahana.cleansky.databinding.ActivityMainBinding
+import com.kahana.cleansky.databinding.ViewDailyAirQualityBinding
 import com.kahana.cleansky.models.AirQualityData
+import com.kahana.cleansky.models.DailyData
 import com.kahana.cleansky.network.AirQualityApiImp
 import com.kahana.cleansky.network.AirQualityDataSource
 import com.kahana.cleansky.util.AirQualityAlgorithm
@@ -37,12 +42,21 @@ class MainActivity : AppCompatActivity() {
         PositioningManager(this)
     }
 
+    private val _errorMessage = MutableLiveData<String>()
+    val errorMessage: LiveData<String>
+        get() = _errorMessage
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         checkLocationPermission()
+
+        errorMessage.observe(this, Observer {
+            binding.errorMessage.visibility = View.VISIBLE
+            binding.errorMessage.text = it
+        })
 
         viewModel.airQualityData.observe(this, Observer {
             val data = it
@@ -54,43 +68,55 @@ class MainActivity : AppCompatActivity() {
             if (location != null) {
                 viewModel.getAirQualityData(location)
             }
+            else {
+                logErrorMessage(resources.getString(R.string.error_cannot_determine_location))
+            }
         })
 
     }
 
     private fun displayData(data: AirQualityData) {
+        binding.mainLayout.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.INVISIBLE
         binding.city.text = resources.getString(R.string.request_for_city, data.city.name)
         binding.attributions.text = resources.getString(R.string.air_quality_reporting_stations, data.attributions.map { it.name })
 
         // Get Ozone for Today
-        val today = todaysDate()
-        val airQualityToday = data.forecast.daily.o3.firstOrNull { it.day == today }
+        val airQualityToday = getAirqualityForToday(data)
         val currentIndex = data.forecast.daily.o3.indexOf(airQualityToday)
 
-        binding.today.date.text = resources.getString(R.string.air_quality_for_date, airQualityToday?.day ?: "")
-        binding.today.ozoneLevel.text = resources.getString(R.string.ozone_level, airQualityToday?.avg)
+        if (airQualityToday != null) {
 
-        val severity = AirQualityAlgorithm.calcualeResultforType(AirQualityAlgorithm.AirQualityType.O3, airQualityToday?.avg ?: 0)
-        setCircleColor(binding.today.severityCircle, severity.color)
-        // Get Ozone for Yesterday
+            configureCard(airQualityToday, binding.today)
 
-        if (currentIndex - 1 > 0) {
-            val airQualityYesterday = data.forecast.daily.o3[currentIndex-1]
-            binding.yesterday.date.text = resources.getString(R.string.air_quality_for_date, airQualityYesterday.day)
-            binding.yesterday.ozoneLevel.text = resources.getString(R.string.ozone_level, airQualityYesterday.avg)
-            val severity = AirQualityAlgorithm.calcualeResultforType(AirQualityAlgorithm.AirQualityType.O3, airQualityYesterday.avg ?: 0)
-            setCircleColor(binding.today.severityCircle, severity.color)
+            // Get Ozone for Yesterday
+            if (currentIndex - 1 > 0) {
+                val airQualityYesterday = data.forecast.daily.o3[currentIndex - 1]
+                configureCard(airQualityYesterday, binding.yesterday)
+            }
+
+            // Get Ozone for Tomorrow
+
+            if (currentIndex + 1 < data.forecast.daily.o3.size) {
+                val airQualityTomorrow = data.forecast.daily.o3[currentIndex + 1]
+                configureCard(airQualityTomorrow, binding.tomorrow)
+            }
         }
-
-        // Get Ozone for Tomorrow
-
-        if (currentIndex + 1 < data.forecast.daily.o3.size) {
-            val airQualityTomorrow = data.forecast.daily.o3[currentIndex+1]
-            binding.tomorrow.date.text = resources.getString(R.string.air_quality_for_date, airQualityTomorrow.day)
-            binding.tomorrow.ozoneLevel.text = resources.getString(R.string.ozone_level, airQualityTomorrow.avg)
-            val severity = AirQualityAlgorithm.calcualeResultforType(AirQualityAlgorithm.AirQualityType.O3, airQualityTomorrow.avg)
-            setCircleColor(binding.today.severityCircle, severity.color)
+        else {
+            logErrorMessage(resources.getString(R.string.error_no_data_for_todays_date))
         }
+    }
+
+    private fun getAirqualityForToday(data: AirQualityData): DailyData? {
+        val today = todaysDate()
+        return data.forecast.daily.o3.firstOrNull { it.day == today }
+    }
+
+     private fun configureCard(airQuality: DailyData, view: ViewDailyAirQualityBinding) {
+        view.date.text = resources.getString(R.string.air_quality_for_date, airQuality.day)
+        view.ozoneLevel.text = resources.getString(R.string.ozone_level, airQuality.avg)
+        val severity = AirQualityAlgorithm.calcualeResultforType(AirQualityAlgorithm.AirQualityType.O3, airQuality.avg ?: 0)
+        setCircleColor(view.severityCircle, severity.color)
     }
 
     private fun setCircleColor(image: ImageView,color: Int) {
@@ -123,8 +149,15 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == PERMISSION_RESULT) {
+        if (requestCode == PERMISSION_RESULT && grantResults.first().equals(0)) {
             location.getLocation()
         }
+        else {
+            logErrorMessage(resources.getString(R.string.error_no_location_permission))
+        }
+    }
+
+    private fun logErrorMessage(msg: String) {
+        _errorMessage.value = msg
     }
 }

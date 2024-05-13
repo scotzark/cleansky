@@ -85,5 +85,59 @@
                 android:id="@+id/tomorrow"
                 layout="@layout/view_daily_air_quality" />
         </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/large"
+            android:text="@string/search_location"
+            android:textSize="16sp"
+            android:textColor="@color/black"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/large"
+            android:gravity="center">
+
+            <EditText
+                android:id="@+id/latitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/small"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:textColor="@color/black"
+                android:hint="@string/latitude"
+                android:inputType="numberDecimal"
+                android:gravity="center"
+                android:imeOptions="actionNext"/>
+
+            <EditText
+                android:id="@+id/longitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/small"
+                android:layout_marginStart="@dimen/medium"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:textColor="@color/black"
+                android:gravity="center"
+                android:inputType="numberDecimal"
+                android:hint="@string/longitude"
+                android:imeOptions="actionDone"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:layout_gravity="center"
+            android:textColor="@color/black"
+            android:text="@string/search" />
+
     </LinearLayout>
+
+
 </LinearLayout>

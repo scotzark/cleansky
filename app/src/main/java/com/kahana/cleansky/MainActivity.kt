@@ -3,11 +3,10 @@ package com.kahana.cleansky
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.ShapeDrawable
+import android.location.Location
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
-import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
@@ -21,6 +20,7 @@ import com.kahana.cleansky.network.AirQualityApiImp
 import com.kahana.cleansky.network.AirQualityDataSource
 import com.kahana.cleansky.util.AirQualityAlgorithm
 import com.kahana.cleansky.util.PositioningManager
+import com.kahana.cleansky.util.visible
 import com.kahana.cleansky.viewmodel.AirQualityViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -66,18 +66,30 @@ class MainActivity : AppCompatActivity() {
         location.currentLocation.observe(this, Observer{
             val location = it
             if (location != null) {
-                viewModel.getAirQualityData(location)
+                searchForAirQualityData(location)
             }
             else {
                 logErrorMessage(resources.getString(R.string.error_cannot_determine_location))
             }
         })
 
+        binding.search.setOnClickListener {
+            val location = Location("")
+            location.latitude =  binding.latitude.text.toString().toDouble()
+            location.longitude = binding.longitude.text.toString().toDouble()
+           searchForAirQualityData(location)
+        }
+    }
+
+    private fun searchForAirQualityData(location: Location) {
+        binding.progressBar.visible = true
+        binding.mainLayout.visible = false
+        viewModel.getAirQualityData(location)
     }
 
     private fun displayData(data: AirQualityData) {
-        binding.mainLayout.visibility = View.VISIBLE
-        binding.progressBar.visibility = View.INVISIBLE
+        binding.progressBar.visible = false
+        binding.mainLayout.visible = true
         binding.city.text = resources.getString(R.string.request_for_city, data.city.name)
         binding.attributions.text = resources.getString(R.string.air_quality_reporting_stations, data.attributions.map { it.name })
 
@@ -113,15 +125,15 @@ class MainActivity : AppCompatActivity() {
     }
 
      private fun configureCard(airQuality: DailyData, view: ViewDailyAirQualityBinding) {
-        view.date.text = resources.getString(R.string.air_quality_for_date, airQuality.day)
-        view.ozoneLevel.text = resources.getString(R.string.ozone_level, airQuality.avg)
-        val severity = AirQualityAlgorithm.calcualeResultforType(AirQualityAlgorithm.AirQualityType.O3, airQuality.avg ?: 0)
+         val severity = AirQualityAlgorithm.calcualeResultforType(AirQualityAlgorithm.AirQualityType.O3, airQuality.avg ?: 0)
+         view.date.text = resources.getString(R.string.air_quality_for_date, airQuality.day)
+         view.ozoneLevel.text = resources.getString(R.string.ozone_level, airQuality.avg)
+         view.description.text = "(${severity.name})"
         setCircleColor(view.severityCircle, severity.color)
     }
 
     private fun setCircleColor(image: ImageView,color: Int) {
         val background = image.background
-        val green = R.color.green
         (background as GradientDrawable).setColor(ContextCompat.getColor(this, color))
     }
     private fun todaysDate(): String {
@@ -158,6 +170,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun logErrorMessage(msg: String) {
+        binding.progressBar.visible = false
+        binding.mainLayout.visible = true
         _errorMessage.value = msg
     }
 }

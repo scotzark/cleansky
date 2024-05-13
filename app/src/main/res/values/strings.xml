@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Clean Sky</string>
+    <string name="app_name_first">Clean</string>
+    <string name="app_name_second">Sky</string>
     <string name="request_for_city">Air Quality Request For City:\n %s</string>
     <string name="air_quality_reporting_stations">Air Quality Reporting Stations:\n %s</string>
     <string name="air_quality_for_date">Air Quality for %s</string>
@@ -8,4 +10,8 @@
     <string name="error_cannot_determine_location">Cannot Determine your location</string>
     <string name="error_no_data_for_todays_date">No Air Quality For Today</string>
     <string name="error_api_error">There was an error communicating with the Air Quality server</string>
+    <string name="latitude">latitude</string>
+    <string name="longitude">longitude</string>
+    <string name="search_location">Search a Different Location:</string>
+    <string name="search">Search</string>
 </resources>
